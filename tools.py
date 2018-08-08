@@ -7,13 +7,12 @@ Created on Sun Jul 29 09:22:21 2018
 
 import FreeCAD,FreeCADGui
  
-class MyTool:
-    "My tool object"
+class MeFaceToDXF_Tool:
+    "MeFaceToDXF tool object"
 
     def GetResources(self):
-        return {"MenuText": "My Command",
-                "Accel": "Ctrl+M",
-                "ToolTip": "My extraordinary command",
+        return {"MenuText": "Faccia->DXF",
+                "ToolTip": "Crea DXF da una faccia",
                 "Pixmap"  :""
                }
  
@@ -24,6 +23,7 @@ class MyTool:
                         return True
  
     def Activated(self):
+        print('il comando funziona di brutto')
         return
  
-FreeCADGui.addCommand('MyCommand1',MyTool())
+FreeCADGui.addCommand('MeFaceToDXF',MeFaceToDXF_Tool())

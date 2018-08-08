@@ -38,16 +38,16 @@ class MakEasyWorkbench ( Workbench ):
      
     def Initialize(self):
         import tools
-        self.appendToolbar("My Tools", ["MyCommand1"])
-        self.appendMenu("My Tools", ["MyCommand1"])
-        Log ("Loading MyModule... done\n")
+        self.appendToolbar("MeTools", ["MeFaceToDXF"])
+        self.appendMenu("MeTools", ["MyFaceToDXF"])
+        Log ("Loading MakEasy Module... done\n")
  
     def Activated(self):
                 # do something here if needed...
-         Msg ("MyWorkbench.Activated()\n")
+         Msg ("MeWorkbench.Activated()\n")
  
     def Deactivated(self):
                 # do something here if needed...
-         Msg ("MyWorkbench.Deactivated()\n")
+         Msg ("MeWorkbench.Deactivated()\n")
  
 FreeCADGui.addWorkbench(MakEasyWorkbench)
