@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jul 28 22:44:09 2018
-
 @author: Riccardo Soldini
 """
 
@@ -32,22 +30,22 @@ class MakEasyWorkbench ( Workbench ):
            """
     MenuText = "MakEasy Tools"
     ToolTip = "workbench for MakEasy App"
- 
+
     def GetClassName(self):
         return "Gui::PythonWorkbench"
-     
+
     def Initialize(self):
         import tools
         self.appendToolbar("MeTools", ["MeFaceToDXF"])
-        self.appendMenu("MeTools", ["MyFaceToDXF"])
+        self.appendMenu("MeTools", ["MeFaceToDXF"])
         Log ("Loading MakEasy Module... done\n")
- 
+
     def Activated(self):
                 # do something here if needed...
          Msg ("MeWorkbench.Activated()\n")
- 
+
     def Deactivated(self):
                 # do something here if needed...
          Msg ("MeWorkbench.Deactivated()\n")
- 
+
 FreeCADGui.addWorkbench(MakEasyWorkbench)
