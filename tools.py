@@ -92,7 +92,7 @@ class MeFaceToDXF_Tool:
                 n1=indexNode(vertexes[0].X,vertexes[0].Y)
                 n2=indexNode(vertexes[1].X,vertexes[1].Y)
                 geos.append(['Line',n1,n2])
-            if type_edge=='GeomCircle':
+            elif type_edge=='GeomCircle':
                 if len(edge.Vertexes)==1:
                     txt='circle'
                     n1=indexNode(edge.Curve.Center.x,edge.Curve.Center.y)
@@ -106,6 +106,14 @@ class MeFaceToDXF_Tool:
                         middle=edge.valueAt(mdldgr)
                         n2=indexNode(middle.x,middle.y)
                         geos.append(['Arc',n1,n2,n3])
+            elif type_edge=="GeomEllipse":
+                txt='ellipse'
+                n1=indexNode(vertexes[0].X,vertexes[0].Y)
+                n2=indexNode(vertexes[1].X,vertexes[1].Y)
+                f1=e.Curve.Focus1
+                rM=e.Curve.MajorRadius
+                rm=e.Curve.MinorRadius
+                #geos.append(['Ellipse',n1,n2,f1,f2,rM])????
         while len(geos)>0:
             empty_search=False
             trovato=False
