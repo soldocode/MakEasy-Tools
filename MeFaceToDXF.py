@@ -19,7 +19,6 @@ from PySide import QtGui
 class MeFaceToDXF_Tool:
     "MeFaceToDXF tool object"
 
-
     def GetResources(self):
         return {"MenuText": "Faccia->DXF",
                 "ToolTip": "Crea DXF da una faccia",
@@ -27,10 +26,10 @@ class MeFaceToDXF_Tool:
                }
 
     def IsActive(self):
-                if FreeCAD.ActiveDocument == None:
-                        return False
-                else:
-                        return True
+        if FreeCAD.ActiveDocument == None:
+            return False
+        else:
+            return True
 
     def Activated(self):
 
@@ -73,7 +72,9 @@ class MeFaceToDXF_Tool:
         rDegree=-math.degrees(zdeg)
         rCenter=face.CenterOfMass
         face=copy_face
-        face.Placement=FreeCAD.Placement(FreeCAD.Vector(0.0,0.0,0.0),FreeCAD.Rotation(rAxis,rDegree),rCenter).multiply(face.Placement)
+        face.Placement=FreeCAD.Placement(FreeCAD.Vector(0.0,0.0,0.0),
+                                         FreeCAD.Rotation(rAxis,rDegree),
+                                         rCenter).multiply(face.Placement)
 
         # find all paths
         edges=face.Edges
@@ -172,7 +173,3 @@ class MeFaceToDXF_Tool:
 
         print('... all done!')
         return
-
-
-
-FreeCADGui.addCommand('MeFaceToDXF',MeFaceToDXF_Tool())

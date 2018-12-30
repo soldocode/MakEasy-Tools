@@ -35,9 +35,10 @@ class MakEasyWorkbench ( Workbench ):
         return "Gui::PythonWorkbench"
 
     def Initialize(self):
-        import tools
-        self.appendToolbar("MeTools", ["MeFaceToDXF"])
-        self.appendMenu("MeTools", ["MeFaceToDXF"])
+        import makEasy_tools
+        tools_command=["MeFaceToDXF","MeObjToMKS"]
+        self.appendToolbar("MeTools", tools_command)
+        self.appendMenu("MeTools",tools_command)
         Log ("Loading MakEasy Module... done\n")
 
     def Activated(self):
