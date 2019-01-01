@@ -2,6 +2,9 @@
 @author: Riccardo Soldini
 """
 
+import math,pprint
+import FreeCAD
+
 def normalized_degrees(angle):
      accuracy=7
      a=math.degrees(round(angle,accuracy))
@@ -79,7 +82,7 @@ def find_adjacent(faces,first):
                                 if index_compare not in group:group.append(index_compare)
 
     print len(contacts),' linked faces found:'
-    pp.pprint(contacts)
+    #pp.pprint(contacts)
     return contacts
 
 

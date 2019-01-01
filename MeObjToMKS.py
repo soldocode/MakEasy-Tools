@@ -5,13 +5,14 @@
 
 import FreeCAD,FreeCADGui,Part
 import sys
+import pprint
 sys.path.append(u"C:\SOLDINISNC\PyApp\mystuff")
 sys.path.append(u"C:\SOLDINISNC\PyApp\makEasy")
 sys.path.append(u"C:\\Users\\UFFICIO TECNICO\\Anaconda3\\lib\\site-packages")
 sys.path.append(u"\PyApp\mystuff")
 sys.path.append(u"\PyApp\makEasy")
 sys.path.append(u"C:\\Users\\Disegno\\Anaconda3\\lib\\site-packages")
-import makEasy,g2,math
+import makEasy,g2
 from PySide import QtGui
 from MeFunctions import *
 
@@ -48,6 +49,33 @@ class MeObjToMKS_Tool:
 
     def Activated(self):
         PARTS={}
+        print "Let's begin..."
+        pp = pprint.PrettyPrinter(indent=4)
+        sels=FreeCADGui.Selection.getSelectionEx()
+        count=0
+        for sel in sels:
+            obj=sel.Object
+            if hasattr(obj,"Shape"):
+                if obj.Shape.Volume>0:
+                    print "Object ", obj.Label
+                    count+=1
+                    part_name=deconstruct_object(obj)
+                    if part_name in PARTS:
+                        PARTS[part_name]['count']+=1
+                        PARTS[part_name]['objects'].append(obj.Label)
+                    else:
+                        PARTS[part_name]={'count':1,'objects':[obj.Label]}
+        print 'Rilevati nr ',count,' oggetti'
+        pp.pprint(PARTS)
+
+        for item in PARTS:
+            print item+'  |  '+str(PARTS[item]['count'])
+        print('... all done!')
+
+        return
+
+
+def deconstruct_object(obj):
         part_name='indefinito'
         comcomp=False
         for c in COMMON_COMP:
@@ -70,7 +98,7 @@ class MeObjToMKS_Tool:
             print 'Number of faces:',fnum
 
             ### create color tree
-            actcolor=sel.Object.ViewObject.DiffuseColor[0]
+            actcolor=obj.ViewObject.DiffuseColor[0]
             dcol=[]
             for i in range (0,fnum):
                 dcol.append(actcolor)
@@ -284,13 +312,4 @@ class MeObjToMKS_Tool:
                                         print 'deltas:',dx,'|',dy,'|',dz,'->',a
                         #fac.append(faces[eight_bigger_faces[0]])
 
-        ### find adjacents faces
-        #find_adjacent(planes)
-
-        if part_name in PARTS:
-            PARTS[part_name]['count']+=1
-            PARTS[part_name]['objects'].append(obj.Label)
-        else:
-            PARTS[part_name]={'count':1,'objects':[obj.Label]}
-        print('... all done!')
-        return  PARTS
+        return part_name
