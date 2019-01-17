@@ -17,7 +17,7 @@ def angle_between_planes(face1,face2):
     vns1 = face1.normalAt(0,0)
     vns2 = face2.normalAt(0,0)
     alpha = math.degrees( vns1.getAngle( vns2 ) )
-    print 'angle between faces:',alpha
+    print ('angle between faces:',alpha)
     return alpha
 
 
@@ -25,7 +25,7 @@ def angle_to_Z(face):
     vns1 = FreeCAD.Vector(0,0,1)
     vns2 = face.normalAt(0,0)
     alpha = math.degrees( vns1.getAngle( vns2 ) )
-    print 'angle between faces:',alpha
+    print ('angle between faces:',alpha)
     return alpha
 
 
@@ -81,7 +81,7 @@ def find_adjacent(faces,first):
                                 contacts[index_face][geo1]=[index_compare,geo2]
                                 if index_compare not in group:group.append(index_compare)
 
-    print len(contacts),' linked faces found:'
+    print (len(contacts),' linked faces found:')
     #pp.pprint(contacts)
     return contacts
 

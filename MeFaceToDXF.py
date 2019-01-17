@@ -65,9 +65,9 @@ class MeFaceToDXF_Tool:
 
         # align face on Z plane
         vns1 = face.normalAt(0.0,0.0)
-        print 'Face normal vect: ',vns1.normalize(),'...'
+        print ('Face normal vect: ',vns1.normalize(),'...')
         zdeg=vns1.getAngle(FreeCAD.Vector(0.0,0.0,1.0))
-        print '...Rotation degree to Z plane: ',math.degrees(zdeg),'...'
+        print ('...Rotation degree to Z plane: ',math.degrees(zdeg),'...')
         rAxis=FreeCAD.Rotation(FreeCAD.Vector(0.0,0.0,1.0),vns1.normalize()).Axis
         rDegree=-math.degrees(zdeg)
         rCenter=face.CenterOfMass

@@ -49,7 +49,7 @@ class MeObjToMKS_Tool:
 
     def Activated(self):
         PARTS={}
-        print "Let's begin..."
+        print ("Let's begin...")
         pp = pprint.PrettyPrinter(indent=4)
         sels=FreeCADGui.Selection.getSelectionEx()
         count=0
@@ -57,7 +57,7 @@ class MeObjToMKS_Tool:
             obj=sel.Object
             if hasattr(obj,"Shape"):
                 if obj.Shape.Volume>0:
-                    print "Object ", obj.Label
+                    print ("Object ", obj.Label)
                     count+=1
                     part_name=deconstruct_object(obj)
                     if part_name in PARTS:
@@ -65,11 +65,11 @@ class MeObjToMKS_Tool:
                         PARTS[part_name]['objects'].append(obj.Label)
                     else:
                         PARTS[part_name]={'count':1,'objects':[obj.Label]}
-        print 'Rilevati nr ',count,' oggetti'
+        print ('Rilevati nr ',count,' oggetti')
         pp.pprint(PARTS)
 
         for item in PARTS:
-            print item+'  |  '+str(PARTS[item]['count'])
+            print (item+'  |  '+str(PARTS[item]['count']))
         print('... all done!')
 
         return
@@ -95,7 +95,7 @@ def deconstruct_object(obj):
                         "Cone":{}}
 
             fnum=len(faces)
-            print 'Number of faces:',fnum
+            print ('Number of faces:',fnum)
 
             ### create color tree
             actcolor=obj.ViewObject.DiffuseColor[0]
@@ -250,7 +250,7 @@ def deconstruct_object(obj):
 
                 if same_geometry:
                     thk=round(f1.distToShape(f2)[0],1)
-                    print 'thk: ',thk
+                    print ('thk: ',thk)
 
                     if thk in POSSIBLE_THK:
                         part_name= 'Sagoma sp. '+str(thk)+' mm'
@@ -280,7 +280,7 @@ def deconstruct_object(obj):
                             if (equal_center) and (abs(blend_thk)==thk):
                                 nblend+=1
                                 not_found=False
-                                print 'blend faces...: ',s1,' and ',c_surf[ind]
+                                print ('blend faces...: ',s1,' and ',c_surf[ind])
                                 blend_faces.append(s1)
                                 blend_faces.append(c_surf[ind])
                             ind+=1
@@ -290,12 +290,12 @@ def deconstruct_object(obj):
                         #print 'find adjacent...maybe..',eight_bigger_faces
                         contacts=find_adjacent(faces,eight_bigger_faces[0])
                         adc=contacts[eight_bigger_faces[0]]
-                        print 'adc:',adc
+                        print ('adc:',adc)
                         if eight_bigger_faces[0] in faces_tree['Plane']:
                             for b in blend_faces:
                                 for ad in adc:
                                     if b==adc[ad][0]:
-                                        print ' Trovato!!!' ,adc[ad]
+                                        print (' Trovato!!!' ,adc[ad])
                                         f1=faces[eight_bigger_faces[0]]
                                         f2=faces[adc[ad][0]]
                                         e1= f1.OuterWire.Edges[ad]
@@ -308,8 +308,8 @@ def deconstruct_object(obj):
                                         dy=round(fp.y-ep.y,3)
                                         dz=round(fp.z-ep.z,3)
                                         a=angle_between_planes(f1,f2)
-                                        print angle_to_Z(f1)
-                                        print 'deltas:',dx,'|',dy,'|',dz,'->',a
+                                        print (angle_to_Z(f1))
+                                        print ('deltas:',dx,'|',dy,'|',dz,'->',a)
                         #fac.append(faces[eight_bigger_faces[0]])
 
         return part_name
