@@ -88,12 +88,12 @@ class MeFaceToDXF_Tool:
             ind_nd=0
             type_edge=type(edge.Curve).__name__
             vertexes=edge.Vertexes
-            if type_edge=='GeomLineSegment':
+            if type_edge=='GeomLineSegment'or type_edge=='Line' :
                 txt='line'
                 n1=indexNode(vertexes[0].X,vertexes[0].Y)
                 n2=indexNode(vertexes[1].X,vertexes[1].Y)
                 geos.append(['Line',n1,n2])
-            elif type_edge=='GeomCircle':
+            elif type_edge=='GeomCircle' or type_edge=='Circle':
                 if len(edge.Vertexes)==1:
                     txt='circle'
                     n1=indexNode(edge.Curve.Center.x,edge.Curve.Center.y)

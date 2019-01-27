@@ -224,12 +224,11 @@ def deconstruct_object(obj):
                     size1=int(max_faces_distance(list(two_faces[0]),faces_tree['Plane']))
                     size2=int(max_faces_distance(list(two_faces[1]),faces_tree['Plane']))
                     lenght=max_found_len(list(two_faces[0]),faces_tree['Plane'])
-                    #print size1
                     if size1>size2 and size1 in POSSIBLE_UNP:
-                        classifed=True
+                        classified=True
                         part_name= "UNP "+str(size1)+" L="+str(lenght)
                     elif size2 in POSSIBLE_UNP:
-                        classifed=True
+                        classified=True
                         part_name= "UNP "+str(size2)+" L="+str(lenght)
 
 
