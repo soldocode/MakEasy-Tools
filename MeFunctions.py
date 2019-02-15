@@ -29,6 +29,69 @@ def angle_to_Z(face):
     return alpha
 
 
+def angle_to_Y(face):
+    vns1 = FreeCAD.Vector(0,1,0)
+    vns2 = face.normalAt(0,0)
+    alpha = math.degrees( vns1.getAngle( vns2 ) )
+    print ('angle to Y plane:',alpha)
+    return alpha
+
+
+def angle_to_X(face):
+    vns1 = FreeCAD.Vector(1,0,0)
+    vns2 = face.normalAt(0,0)
+    alpha = math.degrees( vns1.getAngle( vns2 ) )
+    print ('angle to X plane:',alpha)
+    return alpha
+
+
+def is_edges_parallels(edge1,edge2):
+    result=False
+    d1=edge1.Curve.Direction
+    d2=edge2.Curve.Direction
+    print (d1)
+    print (d2)
+    if abs(d1.x)==abs(d2.x) and abs(d1.y)==abs(d2.y) and abs(d1.z)==abs(d2.z):
+        print ('paralleli')
+        result=True
+    return result
+
+
+def get_parallel_edges(face):
+    e_list=[]
+    for i in range(0,len(face.OuterWire.Edges)):
+        found=False
+        e=face.OuterWire.Edges[i]
+        for c in e_list:
+           if is_edges_parallels(e,face.OuterWire.Edges[c[0]]):
+               c.append(i)
+               found=True
+        if not found:
+            e_list.append([i])
+
+    dist={}
+    for pe in e_list:
+        if len(pe)>1:
+            e1=face.OuterWire.Edges[pe.pop(0)]
+            p1=g2.Point(e1.Vertexes[0].X,e1.Vertexes[0].Y)
+            p2=g2.Point(e1.Vertexes[1].X,e1.Vertexes[1].Y)
+            l1=g2.Line(p1,p2)
+            for e in pe:
+                e2=face.OuterWire.Edges[e]
+                p1=g2.Point(e2.Vertexes[0].X,e2.Vertexes[0].Y)
+                p2=g2.Point(e2.Vertexes[1].X,e2.Vertexes[1].Y)
+                l2=g2.Line(p1,p2)
+                print(l1)
+                print(l2)
+
+    return dist
+
+
+def get_box_dimensions(obj):
+    bb=obj.Shape.BoundBox
+    return [round(bb.XLength,2),round(bb.YLength,2),round(bb.ZLength,2)]
+
+
 def is_planes_parallels(face1,face2):
 
     def plane_from_3points(p1,p2,p3):
@@ -113,3 +176,12 @@ def max_found_len(faces,planes):
          if e.Length>l:
              l=e.Length
     return round(l,0)
+
+
+def min_found_len(faces,planes):
+    l=1000000
+    for f in faces:
+        for e in planes[f].Edges:
+         if e.Length<l:
+             l=e.Length
+    return round(l,2)
