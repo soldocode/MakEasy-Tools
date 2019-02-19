@@ -4,6 +4,7 @@
 
 import math,pprint
 import FreeCAD
+import g2
 
 def normalized_degrees(angle):
      accuracy=7
@@ -185,3 +186,8 @@ def min_found_len(faces,planes):
          if e.Length<l:
              l=e.Length
     return round(l,2)
+
+
+def face_to_g2Shape(face):
+    shape=g2.Shape()
+    return shape
