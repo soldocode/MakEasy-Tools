@@ -5,6 +5,7 @@
 import math,pprint
 import FreeCAD
 import g2
+from FreeCAD import Placement,Rotation
 
 def normalized_degrees(angle):
      accuracy=7
@@ -187,7 +188,22 @@ def min_found_len(faces,planes):
              l=e.Length
     return round(l,2)
 
+def align_face_to_Z_plane (face):
+    xa=angle_to_X(face)
+    pos = face.Placement.Base
+    rot = FreeCAD.Rotation(FreeCAD.Vector(1,0,0),-xa)
+    newplace = FreeCAD.Placement(pos,rot,FreeCAD.Vector(0,0,0))
+    face.Placement = newplace
+    ya=angle_to_Y(face)
+    pos = face.Placement.Base
+    rot = FreeCAD.Rotation(FreeCAD.Vector(0,1,0),-ya)
+    newplace = FreeCAD.Placement(pos,rot,FreeCAD.Vector(0,0,0))
+    face.Placement = newplace
+    return face
 
-def face_to_g2Shape(face):
+def face_to_g2Shape(_face):
+    # create a copy of the selected face
+    face = Part.Face(_face.Wires)
+
     shape=g2.Shape()
     return shape
