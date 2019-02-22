@@ -3,7 +3,7 @@
 """
 
 import math,pprint
-import FreeCAD
+import FreeCAD,Part
 import g2
 from FreeCAD import Placement,Rotation
 
@@ -23,28 +23,46 @@ def angle_between_planes(face1,face2):
     return alpha
 
 
+def align_face_to_Zplane(face):
+    vns1 = FreeCAD.Vector(0,1,0)
+    n=face.normalAt(0,0)
+    if abs(n.z)!=1.0:
+        vns2 = FreeCAD.Vector(n.x,n.y,0).normalize()
+        alpha = math.degrees( vns1.getAngle( vns2 ))
+        face.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,0,1),alpha)
+        #print ('angle to YZ plane:',alpha)
+    vns1 = FreeCAD.Vector(0,0,1)
+    n=face.normalAt(0,0)
+    if abs(n.x)!=1.0:
+        vns2 = FreeCAD.Vector(0,n.y,n.z).normalize()
+        alpha = math.degrees( vns1.getAngle( vns2 ))
+        face.rotate(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,0,0),alpha)
+        #print ('angle to ZX plane:',alpha)
+    return face
+
+
 def angle_to_Z(face):
     vns1 = FreeCAD.Vector(0,0,1)
     vns2 = face.normalAt(0,0)
-    alpha = math.degrees( vns1.getAngle( vns2 ) )
-    print ('angle between faces:',alpha)
-    return alpha
+    alpha = math.degrees( vns1.getAngle( vns2 ))
+    print ('angle to Z axis:',alpha)
+    return round(alpha,6)
 
 
 def angle_to_Y(face):
     vns1 = FreeCAD.Vector(0,1,0)
     vns2 = face.normalAt(0,0)
-    alpha = math.degrees( vns1.getAngle( vns2 ) )
-    print ('angle to Y plane:',alpha)
-    return alpha
+    alpha = math.degrees( vns1.getAngle( vns2 ))
+    print ('angle to Y axis:',alpha)
+    return round(alpha,6)
 
 
 def angle_to_X(face):
     vns1 = FreeCAD.Vector(1,0,0)
     vns2 = face.normalAt(0,0)
-    alpha = math.degrees( vns1.getAngle( vns2 ) )
-    print ('angle to X plane:',alpha)
-    return alpha
+    alpha = math.degrees( vns1.getAngle( vns2 ))
+    print ('angle to X axis:',alpha)
+    return round(alpha,6)
 
 
 def is_edges_parallels(edge1,edge2):
@@ -188,22 +206,68 @@ def min_found_len(faces,planes):
              l=e.Length
     return round(l,2)
 
-def align_face_to_Z_plane (face):
-    xa=angle_to_X(face)
-    pos = face.Placement.Base
-    rot = FreeCAD.Rotation(FreeCAD.Vector(1,0,0),-xa)
-    newplace = FreeCAD.Placement(pos,rot,FreeCAD.Vector(0,0,0))
-    face.Placement = newplace
-    ya=angle_to_Y(face)
-    pos = face.Placement.Base
-    rot = FreeCAD.Rotation(FreeCAD.Vector(0,1,0),-ya)
-    newplace = FreeCAD.Placement(pos,rot,FreeCAD.Vector(0,0,0))
-    face.Placement = newplace
-    return face
 
 def face_to_g2Shape(_face):
+
+    def indexNode(x,y):
+        i=0
+        notfound=True
+        while (notfound) and i<len(nodes):
+            if (x==nodes[i].x) and (y==nodes[i].y):
+                notfound=False
+                i=i-1
+            i=i+1
+        if notfound:
+            nodes.append(g2.Point(x,y))
+        return i
+
+
     # create a copy of the selected face
     face = Part.Face(_face.Wires)
+    align_face_to_Zplane(face)
 
-    shape=g2.Shape()
+    # find all paths
+    edges=face.Edges
+    nodes=[]
+    paths=[]
+    geos=[]
+    all_nodes=[]
+    all_geos=[]
+    chains=[]
+    for edge in edges:
+        ind_nd=0
+        type_edge=type(edge.Curve).__name__
+        vertexes=edge.Vertexes
+        if type_edge=='GeomLineSegment'or type_edge=='Line' :
+            txt='line'
+            n1=indexNode(vertexes[0].X,vertexes[0].Y)
+            n2=indexNode(vertexes[1].X,vertexes[1].Y)
+            geos.append(['Line',n1,n2])
+        elif type_edge=='GeomCircle' or type_edge=='Circle':
+            if len(edge.Vertexes)==1:
+                txt='circle'
+                n1=indexNode(edge.Curve.Center.x,edge.Curve.Center.y)
+                n2=indexNode(vertexes[0].X,vertexes[0].Y)
+                geos.append(['Circle',n1,n2])
+            if len(edge.Vertexes)==2:
+                    txt='arc'
+                    n1=indexNode(vertexes[0].X,vertexes[0].Y)
+                    n3=indexNode(vertexes[1].X,vertexes[1].Y)
+                    mdldgr=edge.ParameterRange[0]+(edge.ParameterRange[1]-edge.ParameterRange[0])/2
+                    middle=edge.valueAt(mdldgr)
+                    n2=indexNode(middle.x,middle.y)
+                    geos.append(['Arc',n1,n2,n3])
+        elif type_edge=="GeomEllipse":
+            txt='ellipse'
+            n1=indexNode(vertexes[0].X,vertexes[0].Y)
+            n2=indexNode(vertexes[1].X,vertexes[1].Y)
+            f1=e.Curve.Focus1
+            rM=e.Curve.MajorRadius
+            rm=e.Curve.MinorRadius
+            #geos.append(['Ellipse',n1,n2,f1,f2,rM])????
+
+    print(geos)
+
+
+    shape=None #g2.Shape()
     return shape
