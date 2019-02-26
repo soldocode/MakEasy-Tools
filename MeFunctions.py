@@ -207,7 +207,7 @@ def min_found_len(faces,planes):
     return round(l,2)
 
 
-def face_to_g2Shape(_face):
+def geos_from_face(_face):
 
     def indexNode(x,y):
         i=0
@@ -221,19 +221,13 @@ def face_to_g2Shape(_face):
             nodes.append(g2.Point(x,y))
         return i
 
-
     # create a copy of the selected face
     face = Part.Face(_face.Wires)
     align_face_to_Zplane(face)
 
-    # find all paths
     edges=face.Edges
     nodes=[]
-    paths=[]
     geos=[]
-    all_nodes=[]
-    all_geos=[]
-    chains=[]
     for edge in edges:
         ind_nd=0
         type_edge=type(edge.Curve).__name__
@@ -265,9 +259,9 @@ def face_to_g2Shape(_face):
             rM=e.Curve.MajorRadius
             rm=e.Curve.MinorRadius
             #geos.append(['Ellipse',n1,n2,f1,f2,rM])????
+    return dict(geos=geos,nodes=nodes)
 
-    print(geos)
 
-
+def face_to_g2Shape(_face):
     shape=None #g2.Shape()
     return shape
