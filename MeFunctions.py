@@ -112,6 +112,33 @@ def get_box_dimensions(obj):
     return [round(bb.XLength,2),round(bb.YLength,2),round(bb.ZLength,2)]
 
 
+def get_faces_by_area(faces):
+   faces_by_area={}
+   for i in range(0,len(faces)):
+      area=faces[i].Area
+      if area in faces_by_area:
+          faces_by_area[area].append(i)
+      else:
+          faces_by_area[area]=[i]
+   return faces_by_area
+
+
+def build_faces_tree(faces):
+    faces_tree={"Plane":{},
+                "Cylinder":{},
+                "Cone":{}}
+    ### Build faces's tree
+    for i in range(0,len(faces)):
+       str_face=faces[i].Surface.__str__()
+       if str_face=="<Cylinder object>":
+           faces_tree['Cylinder'][i]=faces[i]
+       elif str_face=="<Plane object>":
+           faces_tree['Plane'][i]=faces[i]
+       elif str_face=="<Cone object>":
+           faces_tree['Cone'][i]=faces[i]
+    return faces_tree
+
+
 def is_planes_parallels(face1,face2):
 
     def plane_from_3points(p1,p2,p3):
