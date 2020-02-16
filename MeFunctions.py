@@ -5,7 +5,101 @@
 import math,pprint
 import FreeCAD,Part
 import g2
+import makEasy
 from FreeCAD import Placement,Rotation
+
+
+class FCObject(object):
+    def __init__(self,FCObj=None,):
+        self.FCObj=FCObj
+        self.Faces={}
+        self.Weight=round(FCObj.Shape.Volume*0.0000079,1)
+        self.PartName='indefinito'
+        self.Classified=False
+        self.meItem=None
+
+    def parse(self):
+        self.Faces=self.FCObj.Shape.Faces
+        self.FacesByArea=get_faces_by_area(self.Faces)
+        self.FacesTree=build_faces_tree(self.Faces)
+        self.setEightBiggerFaces()
+
+
+    def setEightBiggerFaces(self):
+        self.EightBiggerFaces=[]
+        eight_top_areas=sorted(self.FacesByArea,reverse=True)[:8]
+        count=0
+        index=0
+        while (count<8) and (index<len(eight_top_areas)):
+           for i in range (0,len(self.FacesByArea[eight_top_areas[index]])):
+               self.EightBiggerFaces.append(self.FacesByArea[eight_top_areas[index]][i])
+               count+=1
+           index+=1
+
+    def _getThickness(self):
+        thk=0
+        same_geometry=False
+        group=list(self.EightBiggerFaces)
+
+        if (group[0] in self.FacesTree['Plane']) and (group[1] in self.FacesTree['Plane']):
+            f1=self.FacesTree['Plane'][group[0]]
+            f2=self.FacesTree['Plane'][group[1]]
+            same_geometry=True
+        if (group[0] in self.FacesTree['Cylinder']) and (group[1] in self.FacesTree['Cylinder']):
+            f1=self.FacesTree['Cylinder'][group[0]]
+            f2=self.FacesTree['Cylinder'][group[1]]
+            same_geometry=True
+
+        if same_geometry:
+            thk=round(f1.distToShape(f2)[0],1)
+
+        if thk in POSSIBLE_THK:
+            self.Thk=thk
+
+    def _getAnyBlends(self):
+        c_surf=list(self.FacesTree['Cylinder'])
+        self.NumberOfBlend=0
+        blend_faces=[]
+        while len(c_surf)>0:
+            s1=c_surf.pop(0)
+            not_found=True
+            ind=0
+            while ind<len(c_surf) and not_found:
+                c1=self.FacesTree['Cylinder'][s1]
+                c2=self.FacesTree['Cylinder'][c_surf[ind]]
+                blend_thk=round(c1.distToShape(c2)[0],2)
+                cc1=c1.Surface.Axis
+                cc2=c2.Surface.Axis
+                eqX=round(cc1.x, 2)==round(cc2.x, 2)
+                eqY=round(cc1.y, 2)==round(cc2.y, 2)
+                eqZ=round(cc1.z, 2)==round(cc2.z, 2)
+                equal_center= (eqX and eqY) or (eqX and eqZ) or (eqZ and eqY)
+                if (equal_center) and (abs(blend_thk)==thk):
+                    self.NumberOfBlend+=1
+                    not_found=False
+                    blend_faces.append(s1)
+                    blend_faces.append(c_surf[ind])
+                ind+=1
+        print('... found ',len(self.NumberOfBlend),' blend')
+
+    def _isHProfile(self):
+        result=False
+        return result
+
+    def _isRectTube(self):
+        result=False
+        return result
+
+    def _isCommonComponent(self,comm_comp):
+        result=False
+        for c in comm_comp:
+            if c in self.FCObj.Label:
+              self.PartName=comm_comp[c]['name']
+              self.Classified=True
+              self.meItem=makEasy.Item(Id=self.PartName)
+              result=True
+        return result
+
 
 def normalized_degrees(angle):
      accuracy=7
