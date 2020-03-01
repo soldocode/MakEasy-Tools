@@ -8,6 +8,7 @@ import g2
 import makEasy
 from FreeCAD import Placement,Rotation
 
+POSSIBLE_THK=[2.0,2.5,3.0,4.0,5.0,6.0,8.0,10.0,12.0,15.0,20.0,25.0,30.0,35.0,40.0]
 
 class FCObject(object):
     def __init__(self,FCObj=None,):
@@ -55,6 +56,7 @@ class FCObject(object):
 
         if thk in POSSIBLE_THK:
             self.Thk=thk
+            print('... thickness is ',self.Thk)
 
     def _getAnyBlends(self):
         c_surf=list(self.FacesTree['Cylinder'])
@@ -74,13 +76,13 @@ class FCObject(object):
                 eqY=round(cc1.y, 2)==round(cc2.y, 2)
                 eqZ=round(cc1.z, 2)==round(cc2.z, 2)
                 equal_center= (eqX and eqY) or (eqX and eqZ) or (eqZ and eqY)
-                if (equal_center) and (abs(blend_thk)==thk):
+                if (equal_center) and (abs(blend_thk)==self.Thk):
                     self.NumberOfBlend+=1
                     not_found=False
                     blend_faces.append(s1)
                     blend_faces.append(c_surf[ind])
                 ind+=1
-        print('... found ',len(self.NumberOfBlend),' blend')
+        print('... found ',self.NumberOfBlend,' blend')
 
     def _isHProfile(self):
         result=False
