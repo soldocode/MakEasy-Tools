@@ -22,8 +22,10 @@ class FCObject(object):
     def parse(self):
         self.Faces=self.FCObj.Shape.Faces
         self.FacesByArea=get_faces_by_area(self.Faces)
-        self.FacesTree=build_faces_tree(self.Faces)
         self.setEightBiggerFaces()
+        self.FacesTree=build_faces_tree(self.Faces)
+        self._getFacesMap()
+        ### costruire facemap qui ???
 
 
     def setEightBiggerFaces(self):
@@ -83,6 +85,33 @@ class FCObject(object):
                     blend_faces.append(c_surf[ind])
                 ind+=1
         print('... found ',self.NumberOfBlend,' blend')
+
+    def _getFacesMap(self):
+        id_root=self.EightBiggerFaces[0]
+        num_faces=len(self.Faces)
+        group=[id_root]
+        map={}
+        count_adjacents=0
+        while len(group)>0:
+            index_face=group.pop(0)
+            if not index_face in map:
+                map[index_face]={}
+                e1=self.Faces[index_face].OuterWire.Edges
+                for index_compare in range(0,num_faces):
+                    if index_compare!=index_face:
+                        e2=self.Faces[index_compare].OuterWire.Edges
+                        for geo1 in range(0,len(e1)):
+                            for geo2 in range(0,len(e2)):
+                                if e1[geo1].isSame(e2[geo2]):
+                                    count_adjacents+=1
+                                    map[index_face][geo1]=[index_compare,geo2]
+                                    if index_compare not in group:
+                                        group.append(index_compare)
+
+        print (len(map),' linked faces found:')
+        self.FacesMap={'Root':id_root,
+                       'Map':map,
+                       'Faces':list(map.keys())}
 
     def _isHProfile(self):
         result=False
