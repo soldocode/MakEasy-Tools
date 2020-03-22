@@ -22,13 +22,14 @@ class FCObject(object):
     def parse(self):
         self.Faces=self.FCObj.Shape.Faces
         self.FacesByArea=get_faces_by_area(self.Faces)
-        self.setEightBiggerFaces()
-        self.FacesTree=build_faces_tree(self.Faces)
+        self.FaceRoot=self.FacesByArea[sorted(self.FacesByArea,reverse=True)[:1][0]][0]
         self._getFacesMap()
+        self._setEightBiggerFaces()
+        self.FacesTree=build_faces_tree(self.Faces,self.FacesMap['Faces'])
+        #self.FacesTree=build_faces_tree(self.FacesMap['Faces'])
         ### costruire facemap qui ???
 
-
-    def setEightBiggerFaces(self):
+    def _setEightBiggerFaces(self):
         self.EightBiggerFaces=[]
         eight_top_areas=sorted(self.FacesByArea,reverse=True)[:8]
         count=0
@@ -86,32 +87,10 @@ class FCObject(object):
                 ind+=1
         print('... found ',self.NumberOfBlend,' blend')
 
-    def _getFacesMap(self):
-        id_root=self.EightBiggerFaces[0]
-        num_faces=len(self.Faces)
-        group=[id_root]
-        map={}
-        count_adjacents=0
-        while len(group)>0:
-            index_face=group.pop(0)
-            if not index_face in map:
-                map[index_face]={}
-                e1=self.Faces[index_face].OuterWire.Edges
-                for index_compare in range(0,num_faces):
-                    if index_compare!=index_face:
-                        e2=self.Faces[index_compare].OuterWire.Edges
-                        for geo1 in range(0,len(e1)):
-                            for geo2 in range(0,len(e2)):
-                                if e1[geo1].isSame(e2[geo2]):
-                                    count_adjacents+=1
-                                    map[index_face][geo1]=[index_compare,geo2]
-                                    if index_compare not in group:
-                                        group.append(index_compare)
 
-        print (len(map),' linked faces found:')
-        self.FacesMap={'Root':id_root,
-                       'Map':map,
-                       'Faces':list(map.keys())}
+    def _getFacesMap(self):
+        self.FacesMap=faces_map(self.Faces,self.FaceRoot)
+
 
     def _isHProfile(self):
         result=False
@@ -248,12 +227,13 @@ def get_faces_by_area(faces):
    return faces_by_area
 
 
-def build_faces_tree(faces):
+def build_faces_tree(faces,index):
     faces_tree={"Plane":{},
                 "Cylinder":{},
                 "Cone":{}}
     ### Build faces's tree
-    for i in range(0,len(faces)):
+    #for i in range(0,len(faces)):
+    for i in index:
        str_face=faces[i].Surface.__str__()
        if str_face=="<Cylinder object>":
            faces_tree['Cylinder'][i]=faces[i]
@@ -296,29 +276,31 @@ def is_planes_parallels(face1,face2):
     return result
 
 
-def find_adjacent(faces,first):
-    group=[first]
-    contacts={}
+def faces_map(faces,root):
+    #id_root=self.EightBiggerFaces[0]
+    num_faces=len(faces)
+    group=[root]
+    map={}
     count_adjacents=0
     while len(group)>0:
-        #print 'group:', group
         index_face=group.pop(0)
-        if not index_face in contacts:
-            contacts[index_face]={}
+        if not index_face in map:
+            map[index_face]={}
             e1=faces[index_face].OuterWire.Edges
-            for index_compare in range(0,len(faces)):
+            for index_compare in range(0,num_faces):
                 if index_compare!=index_face:
                     e2=faces[index_compare].OuterWire.Edges
                     for geo1 in range(0,len(e1)):
                         for geo2 in range(0,len(e2)):
                             if e1[geo1].isSame(e2[geo2]):
                                 count_adjacents+=1
-                                contacts[index_face][geo1]=[index_compare,geo2]
-                                if index_compare not in group:group.append(index_compare)
+                                map[index_face][geo1]=[index_compare,geo2]
+                                if index_compare not in group:
+                                    group.append(index_compare)
 
-    print (len(contacts),' linked faces found:')
-    #pp.pprint(contacts)
-    return contacts
+    print (len(map),' linked faces found:')
+    return {'Root':root,'Map':map,'Faces':list(map.keys())}
+
 
 
 def min_faces_distance(faces,planes):
