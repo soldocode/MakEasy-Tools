@@ -8,7 +8,7 @@ import g2
 import makEasy
 from FreeCAD import Placement,Rotation
 
-POSSIBLE_THK=[2.0,2.5,3.0,4.0,5.0,6.0,8.0,10.0,12.0,15.0,20.0,25.0,30.0,35.0,40.0]
+POSSIBLE_THK=[1.0,1.5,2.0,2.5,3.0,4.0,5.0,6.0,8.0,10.0,12.0,15.0,20.0,25.0,30.0,35.0,40.0]
 
 class FCObject(object):
     def __init__(self,FCObj=None,):
@@ -61,10 +61,11 @@ class FCObject(object):
             self.Thk=thk
             print('... thickness is ',self.Thk)
 
-    def _getAnyBlends(self):
+    def _getAnyBends(self):
         c_surf=list(self.FacesTree['Cylinder'])
-        self.NumberOfBlend=0
-        blend_faces=[]
+        self.BendedFaces=[]
+        self.NumberOfBend=0
+        #bend_faces=[]
         while len(c_surf)>0:
             s1=c_surf.pop(0)
             not_found=True
@@ -72,20 +73,21 @@ class FCObject(object):
             while ind<len(c_surf) and not_found:
                 c1=self.FacesTree['Cylinder'][s1]
                 c2=self.FacesTree['Cylinder'][c_surf[ind]]
-                blend_thk=round(c1.distToShape(c2)[0],2)
+                bend_thk=round(c1.distToShape(c2)[0],2)
                 cc1=c1.Surface.Axis
                 cc2=c2.Surface.Axis
                 eqX=round(cc1.x, 2)==round(cc2.x, 2)
                 eqY=round(cc1.y, 2)==round(cc2.y, 2)
                 eqZ=round(cc1.z, 2)==round(cc2.z, 2)
                 equal_center= (eqX and eqY) or (eqX and eqZ) or (eqZ and eqY)
-                if (equal_center) and (abs(blend_thk)==self.Thk):
-                    self.NumberOfBlend+=1
+                if (equal_center) and (abs(bend_thk)==self.Thk):
+                    self.NumberOfBend+=1
                     not_found=False
-                    blend_faces.append(s1)
-                    blend_faces.append(c_surf[ind])
+                    self.BendedFaces.append([s1,c_surf[ind]])
+                    #bend_faces.append(s1)
+                    #bend_faces.append(c_surf[ind])
                 ind+=1
-        print('... found ',self.NumberOfBlend,' blend')
+        print('... found ',self.NumberOfBend,' bend')
 
 
     def _getFacesMap(self):
@@ -216,9 +218,10 @@ def get_box_dimensions(obj):
     return [round(bb.XLength,2),round(bb.YLength,2),round(bb.ZLength,2)]
 
 
-def get_faces_by_area(faces):
+def get_faces_by_area(faces,scope=None):
    faces_by_area={}
-   for i in range(0,len(faces)):
+   if scope==None: scope=[*range(0,len(faces))]
+   for i in scope:
       area=faces[i].Area
       if area in faces_by_area:
           faces_by_area[area].append(i)
