@@ -219,8 +219,8 @@ def get_box_dimensions(obj):
 
 
 def get_faces_by_area(faces,scope=None):
-   faces_by_area={}
    if scope==None: scope=[*range(0,len(faces))]
+   faces_by_area={}
    for i in scope:
       area=faces[i].Area
       if area in faces_by_area:
@@ -230,13 +230,13 @@ def get_faces_by_area(faces,scope=None):
    return faces_by_area
 
 
-def build_faces_tree(faces,index):
+def build_faces_tree(faces,scope=None):
+    if scope==None: scope=[*range(0,len(faces))]
     faces_tree={"Plane":{},
                 "Cylinder":{},
                 "Cone":{}}
     ### Build faces's tree
-    #for i in range(0,len(faces)):
-    for i in index:
+    for i in scope:
        str_face=faces[i].Surface.__str__()
        if str_face=="<Cylinder object>":
            faces_tree['Cylinder'][i]=faces[i]
@@ -399,6 +399,17 @@ def geos_from_face(_face):
     return dict(geos=geos,nodes=nodes)
 
 
-def face_to_g2Shape(_face):
+def changeColor(object,scope,new_color):
+	actual_color=object.ViewObject.DiffuseColor[0]
+	num_faces=len(object.Shape.Faces)
+	col_array=[actual_color]*num_faces
+
+	for c in scope:
+		col_array[c]=new_color
+
+	object.ViewObject.DiffuseColor=col_array	
+
+
+def face_to_g2Shape(face):
     shape=None #g2.Shape()
     return shape
