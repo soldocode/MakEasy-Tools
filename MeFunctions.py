@@ -65,7 +65,6 @@ class FCObject(object):
         c_surf=list(self.FacesTree['Cylinder'])
         self.BendedFaces=[]
         self.NumberOfBend=0
-        #bend_faces=[]
         while len(c_surf)>0:
             s1=c_surf.pop(0)
             not_found=True
@@ -76,16 +75,14 @@ class FCObject(object):
                 bend_thk=round(c1.distToShape(c2)[0],2)
                 cc1=c1.Surface.Axis
                 cc2=c2.Surface.Axis
-                eqX=round(cc1.x, 2)==round(cc2.x, 2)
-                eqY=round(cc1.y, 2)==round(cc2.y, 2)
-                eqZ=round(cc1.z, 2)==round(cc2.z, 2)
-                equal_center= (eqX and eqY) or (eqX and eqZ) or (eqZ and eqY)
+                eqX=round(abs(cc1.x), 4)==round(abs(cc2.x), 4)
+                eqY=round(abs(cc1.y), 4)==round(abs(cc2.y), 4)
+                eqZ=round(abs(cc1.z), 4)==round(abs(cc2.z), 4)
+                equal_center= eqX and eqY and eqZ
                 if (equal_center) and (abs(bend_thk)==self.Thk):
                     self.NumberOfBend+=1
                     not_found=False
                     self.BendedFaces.append([s1,c_surf[ind]])
-                    #bend_faces.append(s1)
-                    #bend_faces.append(c_surf[ind])
                 ind+=1
         print('... found ',self.NumberOfBend,' bend')
 
@@ -407,7 +404,7 @@ def changeColor(object,scope,new_color):
 	for c in scope:
 		col_array[c]=new_color
 
-	object.ViewObject.DiffuseColor=col_array	
+	object.ViewObject.DiffuseColor=col_array
 
 
 def face_to_g2Shape(face):
