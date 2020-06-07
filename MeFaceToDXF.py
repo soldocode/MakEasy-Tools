@@ -165,7 +165,7 @@ class MeFaceToDXF_Tool:
                 print(g)
                 dr.insertGeo(conta,g)
                 conta+=1
-        output_dxf=dr.getDXF()
+        output_dxf=dr.toDXF()
         filename=QtGui.QFileDialog.getSaveFileName(None,"Salva DXF", "", ".DXF")
         f=open(filename[0],"w")
         f.write(output_dxf)
