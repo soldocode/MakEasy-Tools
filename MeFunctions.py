@@ -408,5 +408,123 @@ def changeColor(object,scope,new_color):
 
 
 def face_to_g2Shape(face):
-    shape=None #g2.Shape()
+
+    def indexNode(x,y):
+        i=0
+        notfound=True
+        while (notfound) and i<len(nodes):
+            if (x==nodes[i][0]) and (y==nodes[i][1]):
+                notfound=False
+                i=i-1
+            i=i+1
+        if notfound:
+            nodes.append([x,y])
+            all_nodes.append(g2.Point(x,y))
+        return i
+
+    copy_face = Part.Face(face.Wires)
+
+
+    # align face on Z plane
+    vns1 = face.normalAt(0.0,0.0)
+    print ('Face normal vect: ',vns1.normalize(),'...')
+    zdeg=vns1.getAngle(FreeCAD.Vector(0.0,0.0,1.0))
+    print ('...Rotation degree to Z plane: ',math.degrees(zdeg),'...')
+    rAxis=FreeCAD.Rotation(FreeCAD.Vector(0.0,0.0,1.0),vns1.normalize()).Axis
+    rDegree=-math.degrees(zdeg)
+    rCenter=copy_face.CenterOfMass
+    copy_face.Placement=FreeCAD.Placement(FreeCAD.Vector(0.0,0.0,0.0),
+                                     FreeCAD.Rotation(rAxis,rDegree),
+                                     rCenter).multiply(copy_face.Placement)
+
+    # find all paths
+    edges=copy_face.Edges
+    nodes=[]
+    closed_paths={}
+    geos=[]
+    all_nodes=[]
+    all_geos=[]
+
+    #chains=[]
+    for edge in edges:
+        ind_nd=0
+        type_edge=type(edge.Curve).__name__
+        vertexes=edge.Vertexes
+        if type_edge=='GeomLineSegment'or type_edge=='Line' :
+            txt='line'
+            n1=indexNode(vertexes[0].X,vertexes[0].Y)
+            n2=indexNode(vertexes[1].X,vertexes[1].Y)
+            geos.append(['Line',n1,n2])
+        elif type_edge=='GeomCircle' or type_edge=='Circle':
+            if len(edge.Vertexes)==1:
+                txt='circle'
+                n1=indexNode(edge.Curve.Center.x,edge.Curve.Center.y)
+                n2=indexNode(vertexes[0].X,vertexes[0].Y)
+                geos.append(['Circle',n1,n2])
+            if len(edge.Vertexes)==2:
+                    txt='arc'
+                    n1=indexNode(vertexes[0].X,vertexes[0].Y)
+                    n3=indexNode(vertexes[1].X,vertexes[1].Y)
+                    mdldgr=edge.ParameterRange[0]+(edge.ParameterRange[1]-edge.ParameterRange[0])/2
+                    middle=edge.valueAt(mdldgr)
+                    n2=indexNode(middle.x,middle.y)
+                    geos.append(['Arc',n1,n2,n3])
+        elif type_edge=="GeomEllipse":
+            txt='ellipse'
+            n1=indexNode(vertexes[0].X,vertexes[0].Y)
+            n2=indexNode(vertexes[1].X,vertexes[1].Y)
+            f1=e.Curve.Focus1
+            rM=e.Curve.MajorRadius
+            rm=e.Curve.MinorRadius
+            #geos.append(['Ellipse',n1,n2,f1,f2,rM])????
+    while len(geos)>0:
+        empty_search=False
+        trovato=False
+        act=geos.pop()
+        chain=[act[1],act[0]]
+        if act[0]=='Arc':
+            chain.append(act[2])
+        chain.append(act[-1])
+        node_to_find=act[-1]
+        while not empty_search:
+            i=0
+            empty_search=True
+            while i<len(geos):
+                if geos[i][1]==node_to_find:
+                    trovato=True
+                    chain.append(geos[i][0])
+                    if geos[i][0]=='Arc':
+                        chain.append(geos[i][2])
+                    chain.append(geos[i][-1])
+                    node_to_find=geos[i][-1]
+                elif geos[i][-1]==node_to_find:
+                    trovato=True
+                    chain.append(geos[i][0])
+                    if geos[i][0]=='Arc':
+                        chain.append(geos[i][2])
+                    chain.append(geos[i][1])
+                    node_to_find=geos[i][1]
+                if trovato:
+                    empty_search=False
+                    act=geos[i]
+                    geos.pop(i)
+                    trovato=False
+                else:
+                    i=i+1
+
+        #chains.append(chain)
+        path=g2.Path(all_nodes,chain)
+        if path.isClosed:
+            closed_paths[path.area]=path
+
+
+    ### create shape
+    areas=list(closed_paths.keys())
+    outline_id=max(areas)
+    shape=g2.Shape()
+    shape.outline=closed_paths[outline_id]
+    del(closed_paths[outline_id])
+    shape.internal=[*closed_paths.values()]
+    shape.update()
+
     return shape
