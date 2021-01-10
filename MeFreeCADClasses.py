@@ -3,6 +3,7 @@
 ### 2020
 
 from MeFunctions import *
+import Part
 
 class FCTreeSheet(object):
 	def __init__(self,fc_object=None):
@@ -60,6 +61,8 @@ class FCTreeSheet(object):
 		new_branch.Class=s_up.__class__.__name__
 		new_branch.FaceUp=face_up
 		new_branch.FaceDown=face_down
+		new_branch.ShapeUp=Part.Shape(self.FCObject.Faces[face_up])
+		new_branch.ShapeDown=Part.Shape(self.FCObject.Faces[face_down])
 		if new_branch.Class=='Cylinder':
 			new_branch.Angle=90
 			new_branch.PointOfRotation=s_up.Center
@@ -149,6 +152,8 @@ class Branch(object):
 		self.Axis=None
 		self.FaceUp=None
 		self.FaceDown=None
+		self.ShapeUp=None
+		self.ShapeDown=None
 
 class Joint(object):
 	def __init__(self):
