@@ -14,6 +14,7 @@ class FCObject(object):
     def __init__(self,FCObj=None,):
         self.FCObj=FCObj
         self.Faces={}
+        self.FacesMap={}
         self.Weight=round(FCObj.Shape.Volume*0.0000079,1)
         self.PartName='indefinito'
         self.Classified=False

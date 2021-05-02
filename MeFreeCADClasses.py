@@ -8,7 +8,7 @@ import Part
 class FCTreeSheet(object):
 	def __init__(self,fc_object=None):
 		self.FCObject=fc_object
-		self.Branches=None
+		self.Branches={}
 		self.parse()
 
 	def parse(self):
@@ -17,6 +17,9 @@ class FCTreeSheet(object):
 		couples=[]
 		obj=self.FCObject
 		print (self.Branches)
+		print ('this obj:',obj)
+		print ('this obj.Faces:',obj.Faces)
+		print ('this obj.FaceMap:',obj.FacesMap)
 		#root=list(obj.FacesMap.keys())[0]
 		fba=get_faces_by_area(obj.Faces,obj.FacesMap['Faces'])
 		af=sorted(fba,reverse=True)
@@ -46,12 +49,17 @@ class FCTreeSheet(object):
 					couples.append([idf1,idf2])
 			id_key+=1
 
-
-		couples+=obj.BendedFaces
-		print('couples:',couples)
+		for b in obj.BendedFaces:
+			if not b in couples:couples.append(b)
+		#couples+=obj.BendedFaces  forse non serve (02-05-21)
+		print('all couples:',couples)
 		#branches=[]
 		print ('bended faces:',obj.BendedFaces)
-		self.Branches=self.get_branches(couples[0][0],obj.FacesMap['Map'],couples)
+		print('FacesMap:',obj.FacesMap['Map'].keys())
+		self.Branches=self.get_branches(couples[0][0],
+										obj.FacesMap['Map'],
+										couples,
+										{})
 		print (self.Branches)
 		print ('TreeSheet created.')
 
