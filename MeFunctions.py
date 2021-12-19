@@ -327,7 +327,7 @@ def max_faces_distance(faces,planes):
 def max_found_len(faces,planes):
     l=0
     for f in faces:
-        for e in planes[f].Edges:
+        for e in planes[f].OuterWire.Edges:
          if e.Length>l:
              l=e.Length
     return round(l,0)
@@ -336,7 +336,7 @@ def max_found_len(faces,planes):
 def min_found_len(faces,planes):
     l=1000000
     for f in faces:
-        for e in planes[f].Edges:
+        for e in planes[f].OuterWire.Edges:
          if e.Length<l:
              l=e.Length
     return round(l,2)
